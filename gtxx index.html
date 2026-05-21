@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <title>GT-XTREME BEARING Inventory</title>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif;}
+        body{background:#000;color:#fff;}
+        
+        .login-page{position:fixed;top:0;left:0;width:100%;height:100%;background:#111;display:flex;align-items:center;justify-content:center;z-index:9999;}
+        .login-box{width:100%;max-width:400px;background:#222;padding:30px;border-radius:12px;}
+        .login-box h2{text-align:center;margin-bottom:20px;color:#ffd700;}
+        .login-item{margin:12px 0;}
+        .login-item label{display:block;margin-bottom:5px;font-size:14px;}
+        .login-item input{width:100%;padding:10px;border-radius:6px;border:none;background:#333;color:#fff;font-size:14px;}
+        .forgot-btn{margin-top:8px;font-size:13px;color:#ffd700;cursor:pointer;background:none;border:none;}
+        .login-btn{width:100%;padding:10px;background:#27ae60;color:#fff;border:none;border-radius:6px;margin-top:10px;cursor:pointer;}
+        .logout-btn{background:#e74c3c;color:#fff;padding:6px 12px;border:none;border-radius:6px;cursor:pointer;}
+
+        .sub-account-page{display:none;padding:20px;}
+        .account-list{background:#222;padding:15px;border-radius:8px;margin-top:15px;}
+        .account-item{padding:8px;border-bottom:1px solid #444;display:flex;justify-content:space-between;align-items:center;}
+        .del-acc-btn{background:#c0392b;border:none;color:#fff;padding:3px 8px;border-radius:3px;cursor:pointer;}
+
+        .user-info-mask{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.9);display:none;align-items:center;justify-content:center;z-index:9998;}
+        .user-info-box{background:#222;padding:25px;border-radius:12px;width:100%;max-width:450px;}
+        .avatar-wrap{text-align:center;margin-bottom:15px;}
+        .user-avatar{width:100px;height:100px;border-radius:50%;object-fit:cover;border:2px solid #ffd700;}
+        .avatar-upload{margin-top:8px;font-size:13px;cursor:pointer;}
+
+        .main-system{display:none;}
+        .container{max-width:1800px;margin:0 auto;padding:10px;}
+        header{background:#111;color:#fff;padding:15px;border-radius:10px;margin-bottom:15px;border:1px solid #333;position:relative;}
+        
+        /* 居中渐变标题 无logo */
+        .main-title{
+            font-size:24px;
+            font-weight:bold;
+            letter-spacing:1px;
+            text-align:center;
+            background: linear-gradient(90deg, #ffffff, #00ffff);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        /* 用户名：标题下方 左侧 */
+        .user-nickname{
+            position:absolute;
+            left:20px;
+            bottom:12px;
+            color:#ffffff;
+            font-weight:bold;
+            font-size:14px;
+        }
+        /* 右侧按钮两排靠右缩小 */
+        .nav-btn{
+            position:absolute;
+            right:15px;
+            top:15px;
+            display:flex;
+            flex-direction:column;
+            gap:5px;
+            align-items:flex-end;
+        }
+        .nav-btn-row{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end;}
+        .nav-btn button{padding:5px 8px;border:none;border-radius:6px;cursor:pointer;background:#3498db;color:#fff;font-size:12px;}
+
+        .top-row{display:flex;align-items:center;gap:15px;margin-bottom:15px;flex-wrap:wrap;}
+        .stat-box{display:flex;gap:8px;flex:1;}
+        .stat-item{background:#111;padding:8px 12px;border-radius:8px;text-align:center;border:1px solid #333;flex:1;}
+        .stat-num{font-size:16px;font-weight:bold;color:#ffd700;margin:2px 0;}
+        .stat-txt{color:#ccc;font-size:12px;}
+        
+        /* 超大加宽搜索栏 */
+        .search-box{
+            background:#111;
+            padding:12px 18px;
+            border-radius:8px;
+            display:flex;
+            gap:12px;
+            align-items:center;
+            border:1px solid #333;
+            flex:3;
+            width:100%;
+        }
+        .search-box input{
+            padding:10px;
+            border:1px solid #444;
+            background:#222;
+            color:#fff;
+            border-radius:6px;
+            width:280px;
+            font-size:15px;
+        }
+        .search-box select{
+            padding:10px;
+            border:1px solid #444;
+            background:#222;
+            color:#fff;
+            border-radius:6px;
+            width:200px;
+            font-size:15px;
+        }
+        .search-box button{
+            padding:10px 16px;
+            background:#27ae60;
+            color:#fff;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+            font-size:15px;
+        }
+
+        .stock-wrap{display:grid;grid-template-columns:repeat(7,1fr);gap:12px;}
+        @media (max-width:1400px){.stock-wrap{grid-template-columns:repeat(5,1fr);}}
+        @media (max-width:1000px){.stock-wrap{grid-template-columns:repeat(3,1fr);}}
+        @media (max-width:600px){.stock-wrap{grid-template-columns:repeat(2,1fr);}}
+        .stock-card{background:#111;border-radius:8px;overflow:hidden;border:1px solid #333;}
+        .stock-img{width:100%;height:120px;object-fit:cover;cursor:pointer;}
+        .stock-info{padding:10px;}
+        .stock-name{font-size:13px;font-weight:bold;margin-bottom:4px;color:#fff;}
+        .stock-class{display:inline-block;background:#223;color:#81b4ff;padding:2px 4px;border-radius:3px;font-size:10px;margin-bottom:4px;}
+        .stock-desc{font-size:11px;color:#ccc;line-height:1.3;margin:4px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+        .stock-size{font-size:11px;color:#fff;margin:2px 0;}
+        .stock-pcs{font-size:11px;color:#fff;margin:2px 0;}
+        .price-row{display:flex;flex-wrap:wrap;gap:3px;margin:5px 0;font-size:10px;}
+        .price-cost{background:#4b1515;color:#ff6b6b;padding:2px 3px;border-radius:2px;}
+        .price-group{background:#153315;color:#69db7c;padding:2px 3px;border-radius:2px;}
+        .price-sell{background:#422b15;color:#ffb74d;padding:2px 3px;border-radius:2px;}
+        .price-cash{background:#152442;color:#64b5f6;padding:2px 3px;border-radius:2px;}
+        .card-btn{margin-top:6px;display:flex;gap:4px;flex-wrap:wrap;}
+        .card-btn button{flex:1;padding:4px;border:none;border-radius:3px;cursor:pointer;font-size:10px;white-space:nowrap;}
+        .edit-btn{background:#7b4b94;color:#fff;}
+        .del-btn{background:#555;color:#fff;}
+        .copy-gp{background:#27ae60;color:#fff;}
+        .copy-sl{background:#e67e22;color:#fff;}
+        .copy-cs{background:#9b59b6;color:#fff;}
+
+        .mask{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:999;padding:10px;}
+        .modal{background:#111;width:100%;max-width:900px;height:90vh;border-radius:12px;display:flex;flex-direction:column;border:1px solid #333;position:relative;}
+        .modal-header{display:flex;justify-content:space-between;align-items:center;padding:12px 15px;border-bottom:1px solid #333;}
+        .modal-title{font-size:18px;color:#ffd700;}
+        .modal-close{font-size:24px;color:#fff;background:transparent;border:none;cursor:pointer;}
+        .modal-body{display:flex;flex:1;overflow:hidden;}
+        .modal-left{width:50%;padding:15px;border-right:1px solid #333;overflow-y:auto;}
+        .modal-right{width:50%;padding:15px;overflow-y:auto;}
+        .modal-footer{padding:12px 15px;border-top:1px solid #333;text-align:right;}
+        .modal-item{margin:10px 0;}
+        .modal-item label{display:block;margin-bottom:4px;font-size:13px;color:#ccc;}
+        .modal-item input,.modal-item textarea,.modal-item select{width:100%;padding:8px;border:1px solid #444;background:#222;color:#fff;border-radius:6px;font-size:14px;}
+        .modal-item textarea{resize:vertical;height:70px;}
+        .img-upload-group{display:grid;grid-template-columns:repeat(5,1fr);gap:5px;margin-top:5px;}
+        .preview-item{position:relative;}
+        .preview-small{width:100%;height:50px;object-fit:cover;border:1px solid #555;border-radius:4px;}
+        .del-img-btn{position:absolute;top:-3px;right:-3px;background:red;color:#fff;border:none;width:16px;height:16px;line-height:16px;border-radius:50%;font-size:10px;cursor:pointer;padding:0;}
+        .confirm{padding:8px 18px;background:#27ae60;color:#fff;border:none;border-radius:6px;cursor:pointer;}
+        .cancel{padding:8px 18px;background:#95a5a6;color:#fff;border:none;border-radius:6px;cursor:pointer;}
+
+        .img-view-mask{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.95);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px;}
+        .img-view-box{position:relative;max-width:90%;max-height:90%;text-align:center;}
+        .img-view-box img{max-width:100%;max-height:80vh;border-radius:6px;}
+        .img-view-close{position:absolute;top:-10px;right:-10px;background:#000;color:#fff;border:2px solid #fff;width:32px;height:32px;border-radius:50%;font-size:20px;cursor:pointer;}
+        .img-slide-row{display:flex;gap:8px;justify-content:center;margin-top:15px;}
+        .thumb-img{width:60px;height:45px;object-fit:cover;border:2px solid transparent;cursor:pointer;}
+        .thumb-img.active{border-color:#ffd700;}
+
+        .cate-list{max-height:200px;overflow-y:auto;padding:8px;border:1px solid #444;background:#222;border-radius:6px;}
+        .cate-item{display:flex;justify-content:space-between;padding:4px 6px;margin:3px 0;background:#333;border-radius:3px;}
+        .cate-del{color:#f66;border:none;background:transparent;cursor:pointer;}
+    </style>
+</head>
+<body>
+
+<!-- 登录页面 -->
+<div class="login-page" id="loginPage">
+    <div class="login-box">
+        <h2>Login System</h2>
+        <div class="login-item">
+            <label>Username</label>
+            <input type="text" id="loginUser" placeholder="Enter Username">
+        </div>
+        <div class="login-item">
+            <label>Password</label>
+            <input type="password" id="loginPass" placeholder="Enter Password">
+        </div>
+        <!-- 只留文字 隐藏账号密码提示 -->
+        <button class="forgot-btn" onclick="forgotPassword()">Forgot Password?</button>
+        <button class="login-btn" onclick="userLogin()">Login</button>
+    </div>
+</div>
+
+<!-- 子账号管理 -->
+<div class="sub-account-page" id="subAccountPage">
+    <h2>Supervisor Account Manage</h2>
+    <div class="login-item">
+        <label>New Sub Username</label>
+        <input type="text" id="subUser">
+    </div>
+    <div class="login-item">
+        <label>New Sub Password</label>
+        <input type="password" id="subPass">
+    </div>
+    <button class="login-btn" onclick="createSubAccount()">Create New Account</button>
+    <div class="account-list" id="accountList"></div>
+    <button class="login-btn" style="background:#3498db;margin-top:10px;" onclick="goToSystem()">Back To System</button>
+</div>
+
+<!-- 个人资料 -->
+<div class="user-info-mask" id="userInfoMask">
+    <div class="user-info-box">
+        <h3 style="text-align:center;color:#ffd700;margin-bottom:20px;">Personal Profile</h3>
+        <div class="avatar-wrap">
+            <img id="myAvatar" class="user-avatar" src="">
+            <div class="avatar-upload">
+                <input type="file" id="avatarFile" accept="image/*" style="display:none" onchange="uploadMyAvatar(this)">
+                <span onclick="document.getElementById('avatarFile').click()">Click To Change Avatar</span>
+            </div>
+        </div>
+        <div class="login-item">
+            <label>Display Nickname</label>
+            <input type="text" id="editNickname">
+        </div>
+        <div class="login-item">
+            <label>Old Password</label>
+            <input type="password" id="oldPwd">
+        </div>
+        <div class="login-item">
+            <label>New Password</label>
+            <input type="password" id="newPwd">
+        </div>
+        <div class="login-item">
+            <label>Confirm New Password</label>
+            <input type="password" id="confirmPwd">
+        </div>
+        <button class="confirm" style="width:100%;margin-top:10px;" onclick="saveUserProfile()">Save Changes</button>
+        <button class="cancel" style="width:100%;margin-top:8px;" onclick="closeUserInfo()">Close</button>
+    </div>
+</div>
+
+<!-- 主系统 -->
+<div class="main-system" id="mainSystem">
+    <div class="container">
+        <header>
+            <div class="main-title">GT-XTREME BEARING</div>
+            <span class="user-nickname" id="showNickname"></span>
+            <div class="nav-btn">
+                <div class="nav-btn-row">
+                    <button onclick="openUserInfo()">My Profile</button>
+                    <button onclick="openAddModal()">Add Item</button>
+                    <button onclick="openCateManage()">Category</button>
+                </div>
+                <div class="nav-btn-row">
+                    <button onclick="exportExcel()">Export</button>
+                    <button onclick="refreshStock()">Refresh</button>
+                    <button onclick="openSubAccountPage()" id="adminBtn" style="display:none;background:#f39c12;">Accounts</button>
+                    <button class="logout-btn" onclick="userLogout()">Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="top-row">
+            <div class="stat-box">
+                <div class="stat-item"><div class="stat-txt">Total Items</div><div class="stat-num" id="totalType">0</div></div>
+                <div class="stat-item"><div class="stat-txt">Normal Stock</div><div class="stat-num" id="safeStock">0</div></div>
+                <div class="stat-item"><div class="stat-txt">Low Stock</div><div class="stat-num" id="warnStock">0</div></div>
+            </div>
+            <div class="search-box">
+                <input type="text" id="searchKey" placeholder="Search Product/Size/Desc">
+                <select id="searchClass"><option value="">All Categories</option></select>
+                <button onclick="searchStock()">Search</button>
+                <button onclick="resetSearch()">Reset</button>
+            </div>
+        </div>
+
+        <div class="stock-wrap" id="stockList"></div>
+    </div>
+
+    <!-- 分类弹窗 -->
+    <div class="mask" id="cateMask">
+        <div class="modal" style="max-width:500px;height:auto;">
+            <div class="modal-header">
+                <div class="modal-title">Manage Category</div>
+                <button class="modal-close" onclick="closeCateManage()">×</button>
+            </div>
+            <div class="modal-body" style="display:block;padding:15px;">
+                <div class="modal-item">
+                    <label>Add New Category</label>
+                    <div style="display:flex;gap:8px;">
+                        <input type="text" id="newCateName" placeholder="Category name">
+                        <button class="confirm" onclick="addNewCate()">Add</button>
+                    </div>
+                </div>
+                <div class="cate-list" id="cateListBox"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增/编辑商品 -->
+    <div class="mask" id="addMask">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Add Item</div>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editId" value="">
+                <div class="modal-left">
+                    <div class="modal-item">
+                        <label>Product Name</label>
+                        <input type="text" id="goodsName">
+                    </div>
+                    <div class="modal-item">
+                        <label>Category</label>
+                        <select id="goodsClass"></select>
+                    </div>
+                    <div class="modal-item">
+                        <label>Description</label>
+                        <textarea id="goodsDesc"></textarea>
+                    </div>
+                    <div class="modal-item">
+                        <label>Size</label>
+                        <input type="text" id="goodsSize">
+                    </div>
+                    <div class="modal-item">
+                        <label>1 Box = ? PCS</label>
+                        <input type="number" id="boxPcs">
+                    </div>
+                </div>
+                <div class="modal-right">
+                    <div class="modal-item">
+                        <label>Cost Price</label>
+                        <input type="number" step="0.01" id="costPrice" onblur="fixDecimal(this)">
+                    </div>
+                    <div class="modal-item">
+                        <label>Group Price</label>
+                        <input type="number" step="0.01" id="groupPrice" onblur="fixDecimal(this)">
+                    </div>
+                    <div class="modal-item">
+                        <label>Sell Price</label>
+                        <input type="number" step="0.01" id="sellPrice" onblur="fixDecimal(this)">
+                    </div>
+                    <div class="modal-item">
+                        <label>Cash Price</label>
+                        <input type="number" step="0.01" id="cashPrice" onblur="fixDecimal(this)">
+                    </div>
+                    <div class="modal-item">
+                        <label>Upload Images (Max 5)</label>
+                        <input type="file" accept="image/*" onchange="setImg(0,this)">
+                        <input type="file" accept="image/*" onchange="setImg(1,this)">
+                        <input type="file" accept="image/*" onchange="setImg(2,this)">
+                        <input type="file" accept="image/*" onchange="setImg(3,this)">
+                        <input type="file" accept="image/*" onchange="setImg(4,this)">
+                        <div class="img-upload-group" id="previewGroup"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="cancel" onclick="closeModal()">Cancel</button>
+                <button class="confirm" onclick="saveGoods()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 图片预览 -->
+    <div class="img-view-mask" id="imgViewMask">
+        <div class="img-view-box">
+            <button class="img-view-close" onclick="closeImgView()">×</button>
+            <img id="mainViewImg">
+            <div class="img-slide-row" id="thumbRow"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+let currentUser = null;
+const defaultAdmin = {username:"ocs",password:"0833",role:"admin",nickname:"Supervisor",avatar:""};
+
+function getAllAccounts(){
+    let arr = localStorage.getItem("allUserAccounts");
+    return arr ? JSON.parse(arr) : [defaultAdmin];
+}
+function saveAllAccounts(list){
+    localStorage.setItem("allUserAccounts",JSON.stringify(list));
+}
+
+// 忘记密码功能不变 不再弹窗显示账号密码
+function forgotPassword(){
+    if(!confirm("Reset admin account password?")) return;
+    let resetList = [defaultAdmin];
+    saveAllAccounts(resetList);
+    alert("Admin account password reset completed");
+}
+
+function userLogin(){
+    let un = document.getElementById("loginUser").value.trim();
+    let pwd = document.getElementById("loginPass").value.trim();
+    let userList = getAllAccounts();
+    let user = userList.find(x=>x.username===un&&x.password===pwd);
+    if(!user){
+        alert("Wrong username or password!");
+        return;
+    }
+    currentUser = user;
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("mainSystem").style.display = "block";
+    document.getElementById("showNickname").innerText = `Hi, ${user.nickname||user.username}`;
+    if(user.role==="admin"){
+        document.getElementById("adminBtn").style.display = "inline-block";
+    }else{
+        document.getElementById("adminBtn").style.display = "none";
+    }
+    initSystem();
+}
+
+document.getElementById("loginUser").addEventListener("keydown",(e)=>{if(e.key==="Enter")userLogin()});
+document.getElementById("loginPass").addEventListener("keydown",(e)=>{if(e.key==="Enter")userLogin()});
+
+function userLogout(){
+    currentUser = null;
+    document.getElementById("loginPage").style.display = "flex";
+    document.getElementById("mainSystem").style.display = "none";
+    document.getElementById("subAccountPage").style.display = "none";
+    document.getElementById("userInfoMask").style.display = "none";
+}
+
+function openSubAccountPage(){
+    if(currentUser.role!="admin")return alert("No permission!");
+    document.getElementById("mainSystem").style.display = "none";
+    document.getElementById("subAccountPage").style.display = "block";
+    renderAllAccountList();
+}
+function goToSystem(){
+    document.getElementById("subAccountPage").style.display = "none";
+    document.getElementById("mainSystem").style.display = "block";
+}
+function createSubAccount(){
+    let un = document.getElementById("subUser").value.trim();
+    let pwd = document.getElementById("subPass").value.trim();
+    if(!un||!pwd)return alert("Fill username and password");
+    let list = getAllAccounts();
+    if(list.some(x=>x.username===un))return alert("Username existed");
+    list.push({username:un,password:pwd,role:"user",nickname:un,avatar:""});
+    saveAllAccounts(list);
+    alert("Created!");
+    document.getElementById("subUser").value="";
+    document.getElementById("subPass").value="";
+    renderAllAccountList();
+}
+function delTargetUser(username){
+    if(!confirm("Delete?"))return;
+    let list = getAllAccounts().filter(x=>x.username!==username);
+    saveAllAccounts(list);
+    renderAllAccountList();
+}
+function renderAllAccountList(){
+    let list = getAllAccounts();
+    let html="";
+    list.forEach(item=>{
+        html+=`<div class="account-item">
+            <span>${item.username} | ${item.role}</span>
+            ${item.role!="admin"?`<button class="del-acc-btn" onclick="delTargetUser('${item.username}')">Delete</button>`:""}
+        </div>`;
+    });
+    document.getElementById("accountList").innerHTML=html;
+}
+
+function openUserInfo(){
+    document.getElementById("userInfoMask").style.display="flex";
+    document.getElementById("myAvatar").src=currentUser.avatar||"https://via.placeholder.com/100/333/fff?text=USER";
+    document.getElementById("editNickname").value=currentUser.nickname||currentUser.username;
+}
+function closeUserInfo(){document.getElementById("userInfoMask").style.display="none";}
+function uploadMyAvatar(f){
+    let file=f.files[0];if(!file)return;
+    let r=new FileReader();r.onload=e=>{currentUser.avatar=e.target.result;document.getElementById("myAvatar").src=e.target.result;}
+    r.readAsDataURL(file);
+}
+function saveUserProfile(){
+    let n=document.getElementById("editNickname").value.trim();
+    let o=document.getElementById("oldPwd").value.trim();
+    let nw=document.getElementById("newPwd").value.trim();
+    let c=document.getElementById("confirmPwd").value.trim();
+    let all=getAllAccounts();
+    let i=all.findIndex(x=>x.username===currentUser.username);
+    if(i===-1)return;
+    if(n)all[i].nickname=n;
+    if(o){
+        if(all[i].password!==o)return alert("Old password wrong!");
+        if(nw!==c)return alert("Password not match!");
+        all[i].password=nw;
+    }
+    all[i].avatar=currentUser.avatar;
+    saveAllAccounts(all);
+    currentUser=all[i];
+    document.getElementById("showNickname").innerText=`Hi, ${currentUser.nickname}`;
+    alert("Saved!");closeUserInfo();
+}
+
+let tempImgList=["","","","",""];
+let categoryList=JSON.parse(localStorage.getItem("cateList"))||["Bearing Parts"];
+const defaultStock=[{id:1,name:"6205 Bearing",class:"Bearing Parts",size:"25*52*15",boxPcs:10,imgList:[],desc:"",costPrice:0,groupPrice:0,sellPrice:0,cashPrice:0,stock:0,warn:10}];
+function saveCate(){localStorage.setItem("cateList",JSON.stringify(categoryList));}
+function renderCateOption(){
+    let op="",sl='<option value="">All Categories</option>';
+    categoryList.forEach(c=>{op+=`<option value="${c}">${c}</option>`;sl+=`<option value="${c}">${c}</option>`;});
+    document.getElementById("goodsClass").innerHTML=op;
+    document.getElementById("searchClass").innerHTML=sl;
+}
+function openCateManage(){renderCateOption();let h="";categoryList.forEach((c,i)=>h+=`<div class="cate-item">${c}<button onclick="delCate(${i})">X</button></div>`);document.getElementById("cateListBox").innerHTML=h;document.getElementById("cateMask").style.display="flex";}
+function closeCateManage(){document.getElementById("cateMask").style.display="none";}
+function addNewCate(){let n=document.getElementById("newCateName").value.trim();if(n&&!categoryList.includes(n)){categoryList.push(n);saveCate();openCateManage();}}
+function delCate(i){categoryList.splice(i,1);saveCate();openCateManage();}
+
+function getStockData(){let d=localStorage.getItem("stockData");return d?JSON.parse(d):defaultStock;}
+function saveStockData(d){localStorage.setItem("stockData",JSON.stringify(d));}
+let stockData=getStockData();
+
+function fixDecimal(i){i.value=parseFloat(i.value||0).toFixed(2);}
+function setImg(i,f){if(f.files[0]){let r=new FileReader();r.onload=e=>{tempImgList[i]=e.target.result;renderUploadPreview();};r.readAsDataURL(f.files[0]);}}
+function delPreviewImg(i){tempImgList[i]="";renderUploadPreview();}
+function renderUploadPreview(){let h="";tempImgList.forEach((s,i)=>{h+=`<div class="preview-item"><img class="preview-small" src="${s||''}"><button class="del-img-btn" onclick="delPreviewImg(${i})">×</button></div>`;});document.getElementById("previewGroup").innerHTML=h;}
+
+function initSystem(){renderCateOption();renderStock();countStat();}
+function openImgViewer(arr){if(!arr||!arr.length)return;document.getElementById("mainViewImg").src=arr[0];let t="";arr.forEach((s,i)=>t+=`<img class="thumb-img ${i===0?'active':''}" src="${s}" onclick="switchViewImg('${s}',this)">`);document.getElementById("thumbRow").innerHTML=t;document.getElementById("imgViewMask").style.display="flex";}
+function switchViewImg(s,d){document.getElementById("mainViewImg").src=s;document.querySelectorAll(".thumb-img").forEach(x=>x.classList.remove("active"));d.classList.add("active");}
+function closeImgView(){document.getElementById("imgViewMask").style.display="none";}
+
+function copyGroupPrice(item){let t=`Product: ${item.name}\nSize: ${item.size||''}\nDesc: ${item.desc||''}\nRM${item.groupPrice.toFixed(2)}`;navigator.clipboard.writeText(t).then(()=>alert("Copied"));}
+function copySellPrice(item){let t=`Product: ${item.name}\nSize: ${item.size||''}\nDesc: ${item.desc||''}\nRM${item.sellPrice.toFixed(2)}`;navigator.clipboard.writeText(t).then(()=>alert("Copied"));}
+function copyCashPrice(item){let t=`Product: ${item.name}\nSize: ${item.size||''}\nDesc: ${item.desc||''}\nRM${item.cashPrice.toFixed(2)}`;navigator.clipboard.writeText(t).then(()=>alert("Copied"));}
+
+function renderStock(){
+    let h="";stockData.forEach(item=>{
+        let img=item.imgList?.[0]||'';
+        h+=`<div class="stock-card">
+            <img class="stock-img" src="${img}" onclick='openImgViewer(${JSON.stringify(item.imgList||[])})'>
+            <div class="stock-info">
+                <div class="stock-name">${item.name}</div>
+                <span class="stock-class">${item.class}</span>
+                <div class="stock-desc">${item.desc||''}</div>
+                <div class="stock-size">Size: ${item.size||''}</div>
+                <div class="stock-pcs">1 Box: ${item.boxPcs||0} PCS</div>
+                <div class="price-row">
+                    <span class="price-cost">Cost RM${item.costPrice.toFixed(2)}</span>
+                    <span class="price-group">Group RM${item.groupPrice.toFixed(2)}</span>
+                    <span class="price-sell">Sell RM${item.sellPrice.toFixed(2)}</span>
+                    <span class="price-cash">Cash RM${item.cashPrice.toFixed(2)}</span>
+                </div>
+                <div class="card-btn">
+                    <button class="copy-gp" onclick='copyGroupPrice(${JSON.stringify(item)})'>Group</button>
+                    <button class="copy-sl" onclick='copySellPrice(${JSON.stringify(item)})'>Sell</button>
+                    <button class="copy-cs" onclick='copyCashPrice(${JSON.stringify(item)})'>Cash</button>
+                    <button class="edit-btn" onclick="editItem(${item.id})">Edit</button>
+                    <button class="del-btn" onclick="delGoods(${item.id})">Delete</button>
+                </div>
+            </div>
+        </div>`;
+    });
+    document.getElementById("stockList").innerHTML=h;
+}
+
+function countStat(){
+    let t=stockData.length;
+    let s=stockData.filter(x=>x.stock>x.warn).length;
+    let l=stockData.filter(x=>x.stock<=x.warn).length;
+    document.getElementById("totalType").innerText=t;
+    document.getElementById("safeStock").innerText=s;
+    document.getElementById("warnStock").innerText=l;
+}
+
+function delGoods(id){if(confirm("Delete?")){stockData=stockData.filter(x=>x.id!==id);saveStockData(stockData);renderStock();countStat();}}
+function editItem(id){
+    let item=stockData.find(x=>x.id===id);
+    tempImgList=["","","","",""];
+    if(item.imgList)item.imgList.forEach((s,i)=>{tempImgList[i]=s;});
+    renderUploadPreview();
+    document.getElementById("modalTitle").innerText="Edit Item";
+    document.getElementById("editId").value=id;
+    document.getElementById("goodsName").value=item.name;
+    document.getElementById("goodsClass").value=item.class;
+    document.getElementById("goodsDesc").value=item.desc||'';
+    document.getElementById("goodsSize").value=item.size||'';
+    document.getElementById("boxPcs").value=item.boxPcs||0;
+    document.getElementById("costPrice").value=item.costPrice.toFixed(2);
+    document.getElementById("groupPrice").value=item.groupPrice.toFixed(2);
+    document.getElementById("sellPrice").value=item.sellPrice.toFixed(2);
+    document.getElementById("cashPrice").value=item.cashPrice.toFixed(2);
+    document.getElementById("addMask").style.display="flex";
+}
+function openAddModal(){tempImgList=["","","","",""];renderUploadPreview();document.getElementById("modalTitle").innerText="Add Item";document.getElementById("editId").value="";document.getElementById("goodsName").value="";document.getElementById("goodsDesc").value="";document.getElementById("goodsSize").value="";document.getElementById("boxPcs").value="";document.getElementById("costPrice").value="";document.getElementById("groupPrice").value="";document.getElementById("sellPrice").value="";document.getElementById("cashPrice").value="";document.getElementById("addMask").style.display="flex";}
+function closeModal(){document.getElementById("addMask").style.display="none";}
+
+function saveGoods(){
+    let eid=document.getElementById("editId").value;
+    let n=document.getElementById("goodsName").value.trim();
+    let c=document.getElementById("goodsClass").value;
+    let d=document.getElementById("goodsDesc").value.trim();
+    let s=document.getElementById("goodsSize").value.trim();
+    let b=Number(document.getElementById("boxPcs").value)||0;
+    let cost=Number(document.getElementById("costPrice").value)||0;
+    let gp=Number(document.getElementById("groupPrice").value)||0;
+    let sp=Number(document.getElementById("sellPrice").value)||0;
+    let cp=Number(document.getElementById("cashPrice").value)||0;
+    let imgs=tempImgList.filter(x=>x);
+    if(!n){alert("Fill name");return;}
+    if(eid){
+        let i=stockData.findIndex(v=>v.id==eid);
+        if(i>-1){
+            stockData[i].name=n;stockData[i].class=c;stockData[i].desc=d;stockData[i].size=s;stockData[i].boxPcs=b;
+            stockData[i].costPrice=cost;stockData[i].groupPrice=gp;stockData[i].sellPrice=sp;stockData[i].cashPrice=cp;stockData[i].imgList=imgs;
+        }
+    }else{
+        let newId=stockData.length>0?Math.max(...stockData.map(v=>v.id))+1:1;
+        stockData.push({id:newId,name:n,class:c,desc:d,size:s,boxPcs:b,costPrice:cost,groupPrice:gp,sellPrice:sp,cashPrice:cp,imgList:imgs,stock:0,warn:10});
+    }
+    saveStockData(stockData);closeModal();renderStock();countStat();
+}
+
+function searchStock(){
+    let k=document.getElementById("searchKey").value.toLowerCase();
+    let c=document.getElementById("searchClass").value;
+    let r=stockData.filter(i=>
+        (i.name.toLowerCase().includes(k)||(i.size&&i.size.toLowerCase().includes(k))||(i.desc&&i.desc.toLowerCase().includes(k)))
+        &&(c?i.class===c:true)
+    );
+    let h="";r.forEach(item=>{
+        let img=item.imgList?.[0]||'';
+        h+=`<div class="stock-card">
+            <img class="stock-img" src="${img}" onclick='openImgViewer(${JSON.stringify(item.imgList||[])})'>
+            <div class="stock-info">
+                <div class="stock-name">${item.name}</div>
+                <span class="stock-class">${item.class}</span>
+                <div class="stock-desc">${item.desc||''}</div>
+                <div class="stock-size">Size: ${item.size||''}</div>
+                <div class="stock-pcs">1 Box: ${item.boxPcs||0} PCS</div>
+                <div class="price-row">
+                    <span class="price-cost">Cost RM${item.costPrice.toFixed(2)}</span>
+                    <span class="price-group">Group RM${item.groupPrice.toFixed(2)}</span>
+                    <span class="price-sell">Sell RM${item.sellPrice.toFixed(2)}</span>
+                    <span class="price-cash">Cash RM${item.cashPrice.toFixed(2)}</span>
+                </div>
+                <div class="card-btn">
+                    <button class="copy-gp" onclick='copyGroupPrice(${JSON.stringify(item)})'>Group</button>
+                    <button class="copy-sl" onclick='copySellPrice(${JSON.stringify(item)})'>Sell</button>
+                    <button class="copy-cs" onclick='copyCashPrice(${JSON.stringify(item)})'>Cash</button>
+                    <button class="edit-btn" onclick="editItem(${item.id})">Edit</button>
+                    <button class="del-btn" onclick="delGoods(${item.id})">Delete</button>
+                </div>
+            </div>
+        </div>`;
+    });
+    document.getElementById("stockList").innerHTML=h;
+}
+
+function resetSearch(){document.getElementById("searchKey").value="";document.getElementById("searchClass").value="";renderStock();}
+function refreshStock(){stockData=getStockData();renderStock();countStat();alert("Refreshed");}
+function exportExcel(){
+    let arr=stockData.map(i=>({
+        Name:i.name,Category:i.class,Size:i.size||'',"BoxPCS":i.boxPcs||0,Desc:i.desc||'',
+        Cost:`RM${i.costPrice.toFixed(2)}`,Group:`RM${i.groupPrice.toFixed(2)}`,Sell:`RM${i.sellPrice.toFixed(2)}`,Cash:`RM${i.cashPrice.toFixed(2)}`
+    }));
+    const ws=XLSX.utils.json_to_sheet(arr);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,"Data");XLSX.writeFile(wb,"GT-XTREME.xlsx");
+}
+</script>
+</body>
+</html>
