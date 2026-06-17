@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OUR PRODUCTS | CX BEARING SDN.BHD.</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        a {
+            text-decoration: none;
+        }
+        ul {
+            list-style: none;
+        }
+        html {
+            scroll-behavior: smooth;
+        }
+        .header-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 6%;
+            background-color: #f7f9fc;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .logo-box img {
+            height: 68px;
+        }
+        .logo-text h2 {
+            color: #002060;
+            font-size: 23px;
+            letter-spacing: 0.3px;
+        }
+        .search-box {
+            display: flex;
+        }
+        .search-box input {
+            width: 400px;
+            padding: 12px 16px;
+            border: 1px solid #dee2e6;
+            border-right: none;
+            border-radius: 12px 0 0 12px;
+            font-size: 15px;
+            transition: border 0.2s ease;
+        }
+        .search-box input:focus {
+            outline: none;
+            border-color: #28a745;
+        }
+        .search-box button {
+            padding: 0 26px;
+            background: #28a745;
+            color: #fff;
+            border: 1px solid #28a745;
+            border-radius: 0 12px 12px 0;
+            cursor: pointer;
+            font-size: 15px;
+            transition: background 0.2s ease;
+        }
+        .search-box button:hover {
+            background: #218838;
+        }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+        }
+        .top-phone {
+            font-size: 17px;
+            font-weight: 500;
+            color: #1d2129;
+        }
+        .wa-logo-img {
+            height: 46px;
+            display: block;
+            border-radius: 8px;
+            transition: transform 0.2s ease;
+        }
+        .wa-logo-img:hover {
+            transform: scale(1.05);
+        }
+
+        .main-nav {
+            background-color: #28a745;
+        }
+        .nav-container {
+            max-width: 1240px;
+            margin: 0 auto;
+        }
+        .nav-list {
+            display: flex;
+            justify-content: center;
+        }
+        .nav-list li a {
+            display: block;
+            color: #ffffff;
+            padding: 18px 36px;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: background-color 0.2s ease;
+        }
+        .nav-list li a:hover {
+            background-color: #218838;
+        }
+        .nav-list li a.active {
+            background-color: #218838;
+        }
+
+        .brand-section {
+            padding: 50px 5%;
+            border-bottom: 1px solid #e4e7ed;
+        }
+        .brand-title {
+            text-align: center;
+            font-size: 27px;
+            margin-bottom: 40px;
+            text-transform: uppercase;
+            color: #1d2129;
+            letter-spacing: 0.5px;
+        }
+        .brand-slider-wrap {
+            overflow: hidden;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        .brand-track {
+            display: flex;
+            animation: autoScroll 28s linear infinite;
+        }
+        @keyframes autoScroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .brand-item {
+            flex: 0 0 190px;
+            padding: 0 18px;
+        }
+        .brand-item img {
+            width: 100%;
+            height: 140px;
+            object-fit: contain;
+            border: 1px solid #e9ecef;
+            border-radius: 12px;
+            background: #fff;
+            padding: 10px;
+        }
+
+        .product-section {
+            background-color: #f5f7fa;
+            padding: 50px 5%;
+        }
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(225px, 1fr));
+            gap: 30px;
+            max-width: 1320px;
+            margin: 0 auto;
+        }
+        .product-card {
+            border: 1px solid #e9ecef;
+            background: #ffffff;
+            padding: 18px;
+            border-radius: 12px;
+            transition: all 0.25s ease;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+        .product-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.09);
+        }
+        .img-slider {
+            position: relative;
+            height: 170px;
+            margin-bottom: 14px;
+            overflow: hidden;
+            border-radius: 8px;
+            background-color: #f8f9fa;
+        }
+        .slider-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: none;
+        }
+        .slider-img.active {
+            display: block;
+        }
+        .slide-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 32px;
+            height: 32px;
+            background: rgba(0,0,0,0.55);
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
+            z-index: 2;
+            transition: background 0.2s ease;
+        }
+        .slide-btn:hover {
+            background: rgba(0,0,0,0.7);
+        }
+        .prev-btn { left: 8px; }
+        .next-btn { right: 8px; }
+        .sku-name {
+            font-size: 18px;
+            color: #11151c;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .desc-name {
+            font-size: 14.5px;
+            color: #5e6573;
+            text-align: center;
+            line-height: 1.5;
+        }
+
+        #contact-section {
+            background-color: #333333;
+            color: #ffffff;
+            padding: 70px 5%;
+            text-align: center;
+        }
+        .map-circle {
+            width: 100%;
+            max-width: 650px;
+            height: 420px;
+            background: #ffffff;
+            margin: 0 auto 32px;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        .map-circle iframe {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+        .contact-title {
+            font-size: 33px;
+            margin-bottom: 32px;
+            font-weight: 500;
+        }
+        .contact-detail p {
+            font-size: 18px;
+            line-height: 2.1;
+            margin: 12px 0;
+        }
+        .contact-detail a {
+            color: #86e09c;
+            text-decoration: underline;
+        }
+        .back-top {
+            display: inline-block;
+            margin-top: 38px;
+            padding: 12px 30px;
+            background: #28a745;
+            color: #fff;
+            border-radius: 12px;
+            font-weight: 500;
+            transition: background 0.2s ease;
+        }
+        .back-top:hover {
+            background: #218838;
+        }
+    </style>
+</head>
+<body>
+
+<div class="header-top">
+    <div class="logo-box">
+        <img src="logo.png" alt="Company Logo">
+        <div class="logo-text">
+            <h2>CX BEARING SDN.BHD.</h2>
+        </div>
+    </div>
+    <div class="search-box">
+        <input type="text" placeholder="Search LUBRICANT/ BEARING / GREASE">
+        <button>Search</button>
+    </div>
+    <div class="header-right">
+        <div class="top-phone">Tel: 603-6179 6833</div>
+        <a href="https://wa.me/60124770833" target="_blank">
+            <img src="wa-logo.png" class="wa-logo-img" alt="WhatsApp Chat">
+        </a>
+    </div>
+</div>
+
+<nav class="main-nav">
+    <div class="nav-container">
+        <ul class="nav-list">
+            <li><a href="index.html">home</a></li>
+            <li><a href="our-products.html" class="active">our products</a></li>
+            <li><a href="#contact-section">about us</a></li>
+        </ul>
+    </div>
+</nav>
+
+<section class="brand-section">
+    <h3 class="brand-title">Our Brands</h3>
+    <div class="brand-slider-wrap">
+        <div class="brand-track">
+            <div class="brand-item"><img src="brand1.png" alt="Brand"></div>
+            <div class="brand-item"><img src="brand2.png" alt="Brand"></div>
+            <div class="brand-item"><img src="brand3.png" alt="Brand"></div>
+            <div class="brand-item"><img src="brand4.png" alt="Brand"></div>
+            <div class="brand-item"><img src="brand5.png" alt="Brand"></div>
+
+            <div class="brand-item"><img src="brand1.png" alt="Brand"></div>
+            <div class="brand-item"><img src="brand2.png" alt="Brand"></div>
+            <div class="brand-item"><img src="brand3.png" alt="Brand"></div>
+            <div class="brand-item"><img src="brand4.png" alt="Brand"></div>
+            <div class="brand-item"><img src="brand5.png" alt="Brand"></div>
+        </div>
+    </div>
+</section>
+
+<section class="product-section">
+    <h2 class="section-title">Our Products</h2>
+    <div class="product-grid" id="productContainer">
+        <div style="grid-column: 1/-1; text-align:center; padding:40px; font-size:18px; color:#666;">Loading products...</div>
+    </div>
+</section>
+
+<section id="contact-section">
+    <div class="map-circle">
+        <iframe 
+        width="100%" 
+        height="100%" 
+        frameborder="0" 
+        style="border:0;" 
+        allowfullscreen="" 
+        loading="lazy" 
+        referrerpolicy="no-referrer-when-downgrade"
+        src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3983.621315403497!2d101.67004610000001!3d3.1938036999999992!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cc4708be506d9f%3A0x235aa3af4de793d2!2sCX%20Bearing%20Sdn.%20Bhd.%20(KL)!5e0!3m2!1szh-CN!2smy!4v1781670911989!5m2!1szh-CN!2smy">
+        </iframe>
+    </div>
+    <h2 class="contact-title">CX BEARING SDN.BHD.</h2>
+    <div class="contact-detail">
+        <p>No.1, Jalan 2/46A Off Jalan Selingsing 7,</p>
+        <p>Titian Waris Business Park, Off Jalan Kuching,</p>
+        <p>51200 Kuala Lumpur, Wilayah Persekutuan Kuala Lumpur</p>
+        <p><strong>Tel:</strong> 603-6179 6833</p>
+        <p><strong>WhatsApp:</strong> 6012-477 0833</p>
+    </div>
+    <a href="#" class="back-top">BACK TO TOP</a>
+</section>
+
+<script>
+    const SHEET_CSV_URL = "粘贴你的Google Sheet CSV公开下载链接";
+
+    async function loadProducts() {
+        const container = document.getElementById('productContainer');
+        try {
+            const res = await fetch(SHEET_CSV_URL);
+            const csvText = await res.text();
+            const rows = csvText.trim().split("\n");
+            let html = "";
+            for(let i = 1; i < rows.length; i++){
+                const cols = rows[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
+                const sku = cols[0]?.trim() || "";
+                const desc = cols[1]?.trim() || "";
+                const imgRaw = cols[2]?.trim() || "";
+                let imgArr = imgRaw.split(",").slice(0,3);
+
+                let imgHtml = "";
+                imgArr.forEach((imgUrl, idx)=>{
+                    let actClass = idx === 0 ? "active" : "";
+                    imgHtml += `<img class="slider-img ${actClass}" src="${imgUrl.trim()}" alt="${sku}">`;
+                })
+
+                let btnHtml = imgArr.length > 1 ? `
+                    <button class="slide-btn prev-btn" onclick="slideImage(this, -1)">&lt;</button>
+                    <button class="slide-btn next-btn" onclick="slideImage(this, 1)">&gt;</button>
+                ` : "";
+
+                html += `
+                <div class="product-card">
+                    <div class="img-slider">
+                        ${imgHtml}
+                        ${btnHtml}
+                    </div>
+                    <div class="sku-name">${sku}</div>
+                    <div class="desc-name">${desc}</div>
+                </div>
+                `;
+            }
+            container.innerHTML = html;
+        } catch (err) {
+            container.innerHTML = "<div style='grid-column: 1/-1; text-align:center; padding:40px; color:#d93025;'>Failed to load products. Check your Google Sheet link.</div>";
+        }
+    }
+
+    window.slideImage = function(btn, step){
+        const sliderWrap = btn.parentElement;
+        const allImgs = sliderWrap.querySelectorAll(".slider-img");
+        let activeIdx = 0;
+        allImgs.forEach((img, idx)=>{
+            if(img.classList.contains("active")) activeIdx = idx;
+        })
+        allImgs[activeIdx].classList.remove("active");
+        activeIdx = activeIdx + step;
+        if(activeIdx >= allImgs.length) activeIdx = 0;
+        if(activeIdx < 0) activeIdx = allImgs.length - 1;
+        allImgs[activeIdx].classList.add("active");
+    }
+
+    window.addEventListener("DOMContentLoaded", loadProducts);
+</script>
+
+</body>
+</html>
