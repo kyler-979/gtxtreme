@@ -215,7 +215,7 @@
         .product-card:hover {
             box-shadow: 0 3px 12px #ddd;
         }
-        /* 【修复核心CSS】绝对定位+透明度控制，不会重叠消失 */
+        /* 修复轮播CSS 彻底解决图片遮挡 */
         .img-slider {
             position: relative;
             height: 160px;
@@ -230,12 +230,11 @@
             width: 100%;
             height: 100%;
             object-fit: contain;
-            opacity: 0;
-            visibility: hidden;
+            display: none;
         }
         .slider-img.active {
-            opacity: 1;
-            visibility: visible;
+            display: block;
+            z-index: 2;
         }
         .slide-btn {
             position: absolute;
@@ -468,7 +467,7 @@
                 const sku = cols[0]?.trim() || "";
                 const desc = cols[1]?.trim() || "";
                 const imgRaw = cols[2]?.trim() || "";
-                // 过滤空图片
+                // 过滤空图片链接
                 let imgArr = imgRaw.split(",").map(u=>u.trim()).filter(u=>u).slice(0,3);
                 let imgHtml = "";
                 imgArr.forEach((imgUrl, idx)=>{
@@ -479,7 +478,7 @@
                     }
                 })
                 let btnHtml = imgArr.length > 1 ? `
-                    <button class="slide-btn prev-btn" onclick="slideImage(this, -1)">&lt;</button>
+                    <button class="slide-btn" onclick="slideImage(this, -1)">&lt;</button>
                     <button class="slide-btn next-btn" onclick="slideImage(this, 1)">&gt;</button>
                 ` : "";
                 html += `
@@ -500,26 +499,21 @@
         }
     }
 
-    // 稳定切换函数
-    window.slideImage = function(btn) {
-        const step = event.target.classList.contains('prev-btn') ? -1 : 1;
+    // 图片切换函数
+    window.slideImage = function(btn, step) {
         const sliderWrap = btn.parentElement;
         const allImgs = sliderWrap.querySelectorAll(".slider-img");
         let currentIndex = 0;
-        // 找到当前激活图
         for(let i=0; i<allImgs.length; i++){
             if(allImgs[i].classList.contains("active")){
                 currentIndex = i;
                 break;
             }
         }
-        // 全部取消激活
         allImgs.forEach(img => img.classList.remove("active"));
-        // 计算新下标
         let newIdx = currentIndex + step;
         if(newIdx >= allImgs.length) newIdx = 0;
         if(newIdx < 0) newIdx = allImgs.length - 1;
-        // 仅激活一张
         allImgs[newIdx].classList.add("active");
     };
 
