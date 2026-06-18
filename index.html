@@ -323,7 +323,6 @@
             <h2>CX BEARING SDN.BHD.</h2>
         </div>
     </div>
-    <!-- 增加id、submit搜索跳转 -->
     <form class="search-box" id="homeSearchBox">
         <input type="text" id="homeSearchInput" placeholder="Search LUBRICANT/ BEARING / GREASE">
         <button type="submit">Search</button>
@@ -436,7 +435,7 @@
     }));
     setInterval(nextRight, 4000);
 
-    // ========== 首页搜索跳转功能新增 ==========
+    // ========== 首页搜索跳转功能 ==========
     const homeSearchBox = document.getElementById('homeSearchBox');
     const homeSearchInput = document.getElementById('homeSearchInput');
     homeSearchBox.addEventListener('submit', function(e){
@@ -449,7 +448,7 @@
         }
     });
 
-    // 原有产品加载
+    // 产品加载
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCMx-Kyp9zaYFWNOqkRXP9FogYGYI77eU1ZZt--guZRFNRjsHuJBeB7ZkOaolrAYnfbZThlJ82zJtB/pub?gid=1677472404&single=true&output=csv";
     async function loadProducts() {
         const container = document.getElementById('productContainer');
@@ -463,11 +462,12 @@
                 const sku = cols[0]?.trim() || "";
                 const desc = cols[1]?.trim() || "";
                 const imgRaw = cols[2]?.trim() || "";
-                let imgArr = imgRaw.split(",").slice(0,3);
+                // 修复：过滤空图片链接
+                let imgArr = imgRaw.split(",").map(u=>u.trim()).filter(u=>u).slice(0,3);
                 let imgHtml = "";
                 imgArr.forEach((imgUrl, idx)=>{
                     let actClass = idx === 0 ? "active" : "";
-                    imgHtml += `<img class="slider-img ${actClass}" src="${imgUrl.trim()}" alt="${sku}">`;
+                    imgHtml += `<img class="slider-img ${actClass}" src="${imgUrl}" alt="${sku}">`;
                 })
                 let btnHtml = imgArr.length > 1 ? `
                     <button class="slide-btn prev-btn" onclick="slideImage(this, -1)">&lt;</button>
@@ -490,19 +490,26 @@
             console.error(err);
         }
     }
+
+    // 修复图片切换逻辑
     window.slideImage = function(btn, step){
         const sliderWrap = btn.parentElement;
         const allImgs = sliderWrap.querySelectorAll(".slider-img");
+        // 清空所有激活状态
+        allImgs.forEach(img => img.classList.remove("active"));
         let activeIdx = 0;
-        allImgs.forEach((img, idx)=>{
-            if(img.classList.contains("active")) activeIdx = idx;
-        })
-        allImgs[activeIdx].classList.remove("active");
+        for(let i=0; i<allImgs.length; i++){
+            if(allImgs[i].classList.contains("active")){
+                activeIdx = i;
+                break;
+            }
+        }
         activeIdx = activeIdx + step;
         if(activeIdx >= allImgs.length) activeIdx = 0;
         if(activeIdx < 0) activeIdx = allImgs.length - 1;
         allImgs[activeIdx].classList.add("active");
     }
+
     window.addEventListener("DOMContentLoaded", loadProducts);
 </script>
 </body>
