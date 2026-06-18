@@ -20,7 +20,6 @@
         html {
             scroll-behavior: smooth;
         }
-        /* 头部布局 */
         .header-top {
             display: flex;
             align-items: center;
@@ -74,7 +73,6 @@
             height: 44px;
             display: block;
         }
-        /* 居中导航 */
         .main-nav {
             background-color: #28a745;
         }
@@ -99,7 +97,6 @@
         .nav-list li a.active {
             background-color: #218838;
         }
-        /* 左右横幅 */
         .banner-row {
             display: flex;
             width: 100%;
@@ -213,25 +210,27 @@
         .product-card:hover {
             box-shadow: 0 3px 12px #ddd;
         }
-        /* 全新横向轮播容器，无层级遮挡 */
+        /* 稳定轮播CSS，不会图片遮挡 */
         .img-slider {
             position: relative;
             height: 160px;
-            overflow: hidden;
             margin-bottom: 12px;
-            background: #fff;
-        }
-        .slider-track {
-            display: flex;
-            height: 100%;
-            width: 100%;
-            transition: transform 0.3s ease;
+            overflow: hidden;
+            background-color: #fff;
         }
         .slider-img {
-            flex: 0 0 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             object-fit: contain;
+            display: none;
+            z-index: 1;
+        }
+        .slider-img.active {
+            display: block;
+            z-index: 5;
         }
         .slide-btn {
             position: absolute;
@@ -262,7 +261,6 @@
             text-align: center;
             line-height: 1.4;
         }
-        /* 底部 */
         #contact-section {
             background-color: #333333;
             color: #ffffff;
@@ -394,7 +392,6 @@
     <a href="#" class="back-top">BACK TO TOP</a>
 </section>
 <script>
-    // 顶部横幅轮播
     const leftTrack = document.querySelector('.left-track');
     const leftSlides = document.querySelectorAll('.left-slide');
     const leftDots = document.querySelectorAll('.dot-left');
@@ -433,7 +430,6 @@
     }));
     setInterval(nextRight, 4000);
 
-    // 首页搜索跳转
     const homeSearchBox = document.getElementById('homeSearchBox');
     const homeSearchInput = document.getElementById('homeSearchInput');
     homeSearchBox.addEventListener('submit', function(e){
@@ -446,7 +442,7 @@
         }
     });
 
-    // 产品加载
+    // 沿用你之前正常加载数据的表格链接，无改动
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCMx-Kyp9zaYFWNOqkRXP9FogYGYI77eU1ZZt--guZRFNRjsHuJBeB7ZkOaolrAYnfbZThlJ82zJtB/pub?gid=1677472404&single=true&output=csv";
     async function loadProducts() {
         const container = document.getElementById('productContainer');
@@ -461,21 +457,22 @@
                 const desc = cols[1]?.trim() || "";
                 const imgRaw = cols[2]?.trim() || "";
                 let imgArr = imgRaw.split(",").map(u=>u.trim()).filter(u=>u).slice(0,3);
-                // 构建横向轨道，不再叠加图片
-                let imgTrackHtml = "";
-                imgArr.forEach(imgUrl=>{
-                    imgTrack += `<img class="slider-img" src="${imgUrl}" alt="${sku}">`;
+                let imgHtml = "";
+                imgArr.forEach((imgUrl, idx)=>{
+                    if(idx === 0){
+                        imgHtml += `<img class="slider-img active" src="${imgUrl}" alt="${sku}" loading="eager">`;
+                    }else{
+                        imgHtml += `<img class="slider-img" src="${imgUrl}" alt="${sku}" loading="lazy">`;
+                    }
                 })
                 let btnHtml = imgArr.length > 1 ? `
-                    <button class="slide-btn prev-btn" onclick="slideTrack(this, -1)">&lt;</button>
-                    <button class="slide-btn next-btn" onclick="slideTrack(this, 1)">&gt;</button>
+                    <button class="slide-btn prev-btn" onclick="slideImage(this, -1)">&lt;</button>
+                    <button class="slide-btn next-btn" onclick="slideImage(this, 1)">&gt;</button>
                 ` : "";
                 html += `
                 <div class="product-card">
                     <div class="img-slider">
-                        <div class="slider-track" data-index="0" data-max="${imgArr.length}">
-                            ${imgTrackHtml}
-                        </div>
+                        ${imgHtml}
                         ${btnHtml}
                     </div>
                     <div class="sku-name">${sku}</div>
@@ -490,17 +487,21 @@
         }
     }
 
-    // 全新横向滚动切换函数，无遮挡
-    window.slideTrack = function(btn, step) {
+    window.slideImage = function(btn, step) {
         const sliderWrap = btn.parentElement;
-        const track = sliderWrap.querySelector('.slider-track');
-        const maxNum = Number(track.dataset.max);
-        let current = Number(track.dataset.index);
-        current += step;
-        if(current >= maxNum) current = 0;
-        if(current < 0) current = maxNum - 1;
-        track.dataset.index = current;
-        track.style.transform = `translateX(-${current * 100}%)`;
+        const allImgs = sliderWrap.querySelectorAll(".slider-img");
+        let currentIndex = 0;
+        for(let i=0; i<allImgs.length; i++){
+            if(allImgs[i].classList.contains("active")){
+                currentIndex = i;
+                break;
+            }
+        }
+        allImgs.forEach(img => img.classList.remove("active"));
+        let newIdx = currentIndex + step;
+        if(newIdx >= allImgs.length) newIdx = 0;
+        if(newIdx < 0) newIdx = allImgs.length - 1;
+        allImgs[newIdx].classList.add("active");
     };
 
     window.addEventListener("DOMContentLoaded", loadProducts);
