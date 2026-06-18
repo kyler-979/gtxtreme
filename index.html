@@ -20,6 +20,7 @@
         html {
             scroll-behavior: smooth;
         }
+        /* 头部布局 */
         .header-top {
             display: flex;
             align-items: center;
@@ -73,6 +74,7 @@
             height: 44px;
             display: block;
         }
+        /* 居中导航 */
         .main-nav {
             background-color: #28a745;
         }
@@ -97,6 +99,7 @@
         .nav-list li a.active {
             background-color: #218838;
         }
+        /* 左右横幅整体容器 */
         .banner-row {
             display: flex;
             width: 100%;
@@ -105,6 +108,7 @@
             gap: 30px;
             padding: 0 5%;
         }
+        /* 左侧：厂房横幅 占50%宽度 */
         .banner-left {
             width: 50%;
             height: 320px;
@@ -145,6 +149,7 @@
         .dot-left.active {
             background: #28a745;
         }
+        /* 右侧：产品横幅 占50%宽度 */
         .banner-right {
             width: 50%;
             height: 320px;
@@ -210,27 +215,21 @@
         .product-card:hover {
             box-shadow: 0 3px 12px #ddd;
         }
-        /* 稳定轮播CSS，不会图片遮挡 */
+        /* 产品卡片图片切换 */
         .img-slider {
             position: relative;
             height: 160px;
             margin-bottom: 12px;
             overflow: hidden;
-            background-color: #fff;
         }
         .slider-img {
-            position: absolute;
-            top: 0;
-            left: 0;
             width: 100%;
             height: 100%;
             object-fit: contain;
             display: none;
-            z-index: 1;
         }
         .slider-img.active {
             display: block;
-            z-index: 5;
         }
         .slide-btn {
             position: absolute;
@@ -244,7 +243,7 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 16px;
-            z-index: 10;
+            z-index: 2;
         }
         .prev-btn { left: 5px; }
         .next-btn { right: 5px; }
@@ -261,6 +260,7 @@
             text-align: center;
             line-height: 1.4;
         }
+        /* 底部黑灰联系区域 */
         #contact-section {
             background-color: #333333;
             color: #ffffff;
@@ -304,6 +304,7 @@
             border-radius: 4px;
             font-weight: bold;
         }
+        /* 移动端自动变为上下排列 */
         @media (max-width: 768px) {
             .banner-row {
                 flex-direction: column;
@@ -342,7 +343,9 @@
         </ul>
     </div>
 </nav>
+<!-- 左右分栏横幅容器 -->
 <div class="banner-row">
+    <!-- 左侧：2张factory厂房图 -->
     <div class="banner-left">
         <div class="left-track">
             <div class="left-slide"><img src="factory.jpg" alt="Factory Building"></div>
@@ -353,6 +356,7 @@
             <span class="dot-left" data-index="1"></span>
         </div>
     </div>
+    <!-- 右侧：6张banner产品图 -->
     <div class="banner-right">
         <div class="right-track">
             <div class="right-slide"><img src="banner.jpg" alt="Banner"></div>
@@ -392,6 +396,7 @@
     <a href="#" class="back-top">BACK TO TOP</a>
 </section>
 <script>
+    // 左侧厂房轮播逻辑
     const leftTrack = document.querySelector('.left-track');
     const leftSlides = document.querySelectorAll('.left-slide');
     const leftDots = document.querySelectorAll('.dot-left');
@@ -410,7 +415,7 @@
         updateLeft();
     }));
     setInterval(nextLeft, 4500);
-
+    // 右侧产品轮播逻辑
     const rightTrack = document.querySelector('.right-track');
     const rightSlides = document.querySelectorAll('.right-slide');
     const rightDots = document.querySelectorAll('.dot-right');
@@ -430,6 +435,7 @@
     }));
     setInterval(nextRight, 4000);
 
+    // ========== 首页搜索跳转功能 ==========
     const homeSearchBox = document.getElementById('homeSearchBox');
     const homeSearchInput = document.getElementById('homeSearchInput');
     homeSearchBox.addEventListener('submit', function(e){
@@ -442,7 +448,7 @@
         }
     });
 
-    // 沿用你之前正常加载数据的表格链接，无改动
+    // 产品加载
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCMx-Kyp9zaYFWNOqkRXP9FogYGYI77eU1ZZt--guZRFNRjsHuJBeB7ZkOaolrAYnfbZThlJ82zJtB/pub?gid=1677472404&single=true&output=csv";
     async function loadProducts() {
         const container = document.getElementById('productContainer');
@@ -456,14 +462,12 @@
                 const sku = cols[0]?.trim() || "";
                 const desc = cols[1]?.trim() || "";
                 const imgRaw = cols[2]?.trim() || "";
+                // 修复：过滤空图片链接
                 let imgArr = imgRaw.split(",").map(u=>u.trim()).filter(u=>u).slice(0,3);
                 let imgHtml = "";
                 imgArr.forEach((imgUrl, idx)=>{
-                    if(idx === 0){
-                        imgHtml += `<img class="slider-img active" src="${imgUrl}" alt="${sku}" loading="eager">`;
-                    }else{
-                        imgHtml += `<img class="slider-img" src="${imgUrl}" alt="${sku}" loading="lazy">`;
-                    }
+                    let actClass = idx === 0 ? "active" : "";
+                    imgHtml += `<img class="slider-img ${actClass}" src="${imgUrl}" alt="${sku}">`;
                 })
                 let btnHtml = imgArr.length > 1 ? `
                     <button class="slide-btn prev-btn" onclick="slideImage(this, -1)">&lt;</button>
@@ -487,22 +491,24 @@
         }
     }
 
-    window.slideImage = function(btn, step) {
+    // 修复图片切换逻辑
+    window.slideImage = function(btn, step){
         const sliderWrap = btn.parentElement;
         const allImgs = sliderWrap.querySelectorAll(".slider-img");
-        let currentIndex = 0;
+        // 清空所有激活状态
+        allImgs.forEach(img => img.classList.remove("active"));
+        let activeIdx = 0;
         for(let i=0; i<allImgs.length; i++){
             if(allImgs[i].classList.contains("active")){
-                currentIndex = i;
+                activeIdx = i;
                 break;
             }
         }
-        allImgs.forEach(img => img.classList.remove("active"));
-        let newIdx = currentIndex + step;
-        if(newIdx >= allImgs.length) newIdx = 0;
-        if(newIdx < 0) newIdx = allImgs.length - 1;
-        allImgs[newIdx].classList.add("active");
-    };
+        activeIdx = activeIdx + step;
+        if(activeIdx >= allImgs.length) activeIdx = 0;
+        if(activeIdx < 0) activeIdx = allImgs.length - 1;
+        allImgs[activeIdx].classList.add("active");
+    }
 
     window.addEventListener("DOMContentLoaded", loadProducts);
 </script>
