@@ -435,7 +435,7 @@
     }));
     setInterval(nextRight, 4000);
 
-    // ========== 首页搜索跳转功能 ==========
+    // 首页搜索跳转功能
     const homeSearchBox = document.getElementById('homeSearchBox');
     const homeSearchInput = document.getElementById('homeSearchInput');
     homeSearchBox.addEventListener('submit', function(e){
@@ -448,7 +448,7 @@
         }
     });
 
-    // 产品加载
+    // 产品加载逻辑（修复图片空值、切换bug）
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCMx-Kyp9zaYFWNOqkRXP9FogYGYI77eU1ZZt--guZRFNRjsHuJBeB7ZkOaolrAYnfbZThlJ82zJtB/pub?gid=1677472404&single=true&output=csv";
     async function loadProducts() {
         const container = document.getElementById('productContainer');
@@ -462,12 +462,15 @@
                 const sku = cols[0]?.trim() || "";
                 const desc = cols[1]?.trim() || "";
                 const imgRaw = cols[2]?.trim() || "";
-                // 修复：过滤空图片链接
+                // 过滤空图片链接
                 let imgArr = imgRaw.split(",").map(u=>u.trim()).filter(u=>u).slice(0,3);
                 let imgHtml = "";
                 imgArr.forEach((imgUrl, idx)=>{
-                    let actClass = idx === 0 ? "active" : "";
-                    imgHtml += `<img class="slider-img ${actClass}" src="${imgUrl}" alt="${sku}">`;
+                    if(idx === 0){
+                        imgHtml += `<img class="slider-img active" src="${imgUrl}" alt="${sku}">`;
+                    }else{
+                        imgHtml += `<img class="slider-img" src="${imgUrl}" alt="${sku}">`;
+                    }
                 })
                 let btnHtml = imgArr.length > 1 ? `
                     <button class="slide-btn prev-btn" onclick="slideImage(this, -1)">&lt;</button>
@@ -491,24 +494,20 @@
         }
     }
 
-    // 修复图片切换逻辑
-    window.slideImage = function(btn, step){
+    // 最终修复图片切换函数：清空全部active再赋值
+    window.slideImage = function(btn, step) {
         const sliderWrap = btn.parentElement;
         const allImgs = sliderWrap.querySelectorAll(".slider-img");
-        // 清空所有激活状态
+        let currentIndex = -1;
+        allImgs.forEach((img, index) => {
+            if (img.classList.contains("active")) currentIndex = index;
+        });
         allImgs.forEach(img => img.classList.remove("active"));
-        let activeIdx = 0;
-        for(let i=0; i<allImgs.length; i++){
-            if(allImgs[i].classList.contains("active")){
-                activeIdx = i;
-                break;
-            }
-        }
-        activeIdx = activeIdx + step;
-        if(activeIdx >= allImgs.length) activeIdx = 0;
-        if(activeIdx < 0) activeIdx = allImgs.length - 1;
-        allImgs[activeIdx].classList.add("active");
-    }
+        let newIndex = currentIndex + step;
+        if (newIndex >= allImgs.length) newIndex = 0;
+        if (newIndex < 0) newIndex = allImgs.length - 1;
+        allImgs[newIndex].classList.add("active");
+    };
 
     window.addEventListener("DOMContentLoaded", loadProducts);
 </script>

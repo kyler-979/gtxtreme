@@ -375,7 +375,6 @@
                 const sku = cols[0]?.trim() || "";
                 const desc = cols[1]?.trim() || "";
                 const imgRaw = cols[2]?.trim() || "";
-                // 过滤空图片链接
                 let imgArr = imgRaw.split(",").map(u=>u.trim()).filter(u=>u).slice(0,3);
                 allProducts.push({sku, desc, imgArr});
             }
@@ -406,8 +405,11 @@
         filteredProducts.forEach(product => {
             let imgHtml = "";
             product.imgArr.forEach((imgUrl, idx)=>{
-                let actClass = idx === 0 ? "active" : "";
-                imgHtml += `<img class="slider-img ${actClass}" src="${imgUrl}" alt="${product.sku}">`;
+                if(idx === 0){
+                    imgHtml += `<img class="slider-img active" src="${imgUrl}" alt="${product.sku}">`;
+                }else{
+                    imgHtml += `<img class="slider-img" src="${imgUrl}" alt="${product.sku}">`;
+                }
             });
             let btnHtml = product.imgArr.length > 1 ? `
                 <button class="slide-btn prev-btn" onclick="slideImage(this, -1)">&lt;</button>
@@ -451,22 +453,19 @@
         window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
     });
 
-    // 修复图片切换函数
-    window.slideImage = function(btn, step){
+    // 修复图片切换核心逻辑
+    window.slideImage = function(btn, step) {
         const sliderWrap = btn.parentElement;
         const allImgs = sliderWrap.querySelectorAll(".slider-img");
+        let currentIndex = -1;
+        allImgs.forEach((img, index) => {
+            if (img.classList.contains("active")) currentIndex = index;
+        });
         allImgs.forEach(img => img.classList.remove("active"));
-        let activeIdx = 0;
-        for(let i=0; i<allImgs.length; i++){
-            if(allImgs[i].classList.contains("active")){
-                activeIdx = i;
-                break;
-            }
-        }
-        activeIdx = activeIdx + step;
-        if(activeIdx >= allImgs.length) activeIdx = 0;
-        if(activeIdx < 0) activeIdx = allImgs.length - 1;
-        allImgs[activeIdx].classList.add("active");
+        let newIndex = currentIndex + step;
+        if (newIndex >= allImgs.length) newIndex = 0;
+        if (newIndex < 0) newIndex = allImgs.length - 1;
+        allImgs[newIndex].classList.add("active");
     };
 
     window.addEventListener("DOMContentLoaded", initProducts);
