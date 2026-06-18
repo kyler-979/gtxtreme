@@ -90,7 +90,6 @@
         .wa-logo-img:hover {
             transform: scale(1.05);
         }
-
         .main-nav {
             background-color: #28a745;
         }
@@ -117,7 +116,6 @@
         .nav-list li a.active {
             background-color: #218838;
         }
-
         .brand-section {
             padding: 50px 5%;
             border-bottom: 1px solid #e4e7ed;
@@ -156,7 +154,6 @@
             background: #fff;
             padding: 10px;
         }
-
         .product-section {
             background-color: #f5f7fa;
             padding: 50px 5%;
@@ -230,7 +227,6 @@
             text-align: center;
             line-height: 1.5;
         }
-
         #contact-section {
             background-color: #333333;
             color: #ffffff;
@@ -281,7 +277,6 @@
     </style>
 </head>
 <body>
-
 <div class="header-top">
     <div class="logo-box">
         <img src="logo.png" alt="Company Logo">
@@ -289,10 +284,10 @@
             <h2>CX BEARING SDN.BHD.</h2>
         </div>
     </div>
-    <div class="search-box">
-        <input type="text" placeholder="Search LUBRICANT/ BEARING / GREASE">
-        <button>Search</button>
-    </div>
+    <form class="search-box" id="productSearchBox">
+        <input type="text" id="productSearchInput" placeholder="Search LUBRICANT/ BEARING / GREASE">
+        <button type="submit">Search</button>
+    </form>
     <div class="header-right">
         <div class="top-phone">Tel: 603-6179 6833</div>
         <a href="https://wa.me/60124770833" target="_blank">
@@ -300,7 +295,6 @@
         </a>
     </div>
 </div>
-
 <nav class="main-nav">
     <div class="nav-container">
         <ul class="nav-list">
@@ -310,7 +304,6 @@
         </ul>
     </div>
 </nav>
-
 <section class="brand-section">
     <h3 class="brand-title">Our Brands</h3>
     <div class="brand-slider-wrap">
@@ -320,7 +313,6 @@
             <div class="brand-item"><img src="brand3.png" alt="Brand"></div>
             <div class="brand-item"><img src="brand4.png" alt="Brand"></div>
             <div class="brand-item"><img src="brand5.png" alt="Brand"></div>
-
             <div class="brand-item"><img src="brand1.png" alt="Brand"></div>
             <div class="brand-item"><img src="brand2.png" alt="Brand"></div>
             <div class="brand-item"><img src="brand3.png" alt="Brand"></div>
@@ -329,14 +321,12 @@
         </div>
     </div>
 </section>
-
 <section class="product-section">
     <h2 class="section-title">Our Products</h2>
     <div class="product-grid" id="productContainer">
         <div style="grid-column: 1/-1; text-align:center; padding:40px; font-size:18px; color:#666;">Loading products...</div>
     </div>
 </section>
-
 <section id="contact-section">
     <div class="map-circle">
         <iframe 
@@ -360,51 +350,105 @@
     </div>
     <a href="#" class="back-top">BACK TO TOP</a>
 </section>
-
 <script>
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR2i2xO_rLDb_cjHdDDc9L_Xu-yybLVq9jjEEMbwwIO05f2q59m3EbIp18acQds78zVGqpZSXccL4BO/pub?gid=1266270234&single=true&output=csv";
+    let allProducts = [];
 
-    async function loadProducts() {
-        const container = document.getElementById('productContainer');
+    function getSearchKeyword() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const keyword = urlParams.get('search');
+        if (keyword) {
+            document.getElementById('productSearchInput').value = decodeURIComponent(keyword);
+            return decodeURIComponent(keyword).toLowerCase();
+        }
+        return '';
+    }
+
+    async function loadAllProducts() {
         try {
             const res = await fetch(SHEET_CSV_URL);
             const csvText = await res.text();
             const rows = csvText.trim().split("\n");
-            let html = "";
+            allProducts = [];
             for(let i = 1; i < rows.length; i++){
                 const cols = rows[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
                 const sku = cols[0]?.trim() || "";
                 const desc = cols[1]?.trim() || "";
                 const imgRaw = cols[2]?.trim() || "";
                 let imgArr = imgRaw.split(",").slice(0,3);
-
-                let imgHtml = "";
-                imgArr.forEach((imgUrl, idx)=>{
-                    let actClass = idx === 0 ? "active" : "";
-                    imgHtml += `<img class="slider-img ${actClass}" src="${imgUrl.trim()}" alt="${sku}">`;
-                })
-
-                let btnHtml = imgArr.length > 1 ? `
-                    <button class="slide-btn prev-btn" onclick="slideImage(this, -1)">&lt;</button>
-                    <button class="slide-btn next-btn" onclick="slideImage(this, 1)">&gt;</button>
-                ` : "";
-
-                html += `
-                <div class="product-card">
-                    <div class="img-slider">
-                        ${imgHtml}
-                        ${btnHtml}
-                    </div>
-                    <div class="sku-name">${sku}</div>
-                    <div class="desc-name">${desc}</div>
-                </div>
-                `;
+                allProducts.push({sku, desc, imgArr});
             }
-            container.innerHTML = html;
+            return true;
         } catch (err) {
+            console.error(err);
+            return false;
+        }
+    }
+
+    function renderProducts(keyword = '') {
+        const container = document.getElementById('productContainer');
+        if (allProducts.length === 0) {
+            container.innerHTML = "<div style='grid-column: 1/-1; text-align:center; padding:40px; font-size:18px; color:#666;'>No products found</div>";
+            return;
+        }
+        let filteredProducts = allProducts;
+        if (keyword) {
+            filteredProducts = allProducts.filter(p => 
+                p.sku.toLowerCase().includes(keyword) || p.desc.toLowerCase().includes(keyword)
+            );
+        }
+        if (filteredProducts.length === 0) {
+            container.innerHTML = "<div style='grid-column: 1/-1; text-align:center; padding:40px; font-size:18px; color:#666;'>No products match your search</div>";
+            return;
+        }
+        let html = "";
+        filteredProducts.forEach(product => {
+            let imgHtml = "";
+            product.imgArr.forEach((imgUrl, idx)=>{
+                let actClass = idx === 0 ? "active" : "";
+                imgHtml += `<img class="slider-img ${actClass}" src="${imgUrl.trim()}" alt="${product.sku}">`;
+            });
+            let btnHtml = product.imgArr.length > 1 ? `
+                <button class="slide-btn prev-btn" onclick="slideImage(this, -1)">&lt;</button>
+                <button class="slide-btn next-btn" onclick="slideImage(this, 1)">&gt;</button>
+            ` : "";
+            html += `
+            <div class="product-card">
+                <div class="img-slider">
+                    ${imgHtml}
+                    ${btnHtml}
+                </div>
+                <div class="sku-name">${product.sku}</div>
+                <div class="desc-name">${product.desc}</div>
+            </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    async function initProducts() {
+        const container = document.getElementById('productContainer');
+        container.innerHTML = "<div style='grid-column: 1/-1; text-align:center; padding:40px; font-size:18px; color:#666;'>Loading products...</div>";
+        const loaded = await loadAllProducts();
+        if (loaded) {
+            const keyword = getSearchKeyword();
+            renderProducts(keyword);
+        } else {
             container.innerHTML = "<div style='grid-column: 1/-1; text-align:center; padding:40px; color:#d93025;'>Failed to load products. Check your Google Sheet link.</div>";
         }
     }
+
+    const productSearchBox = document.getElementById('productSearchBox');
+    const productSearchInput = document.getElementById('productSearchInput');
+    productSearchBox.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const keyword = productSearchInput.value.trim().toLowerCase();
+        renderProducts(keyword);
+        const urlParams = new URLSearchParams(window.location.search);
+        if (keyword) urlParams.set('search', keyword);
+        else urlParams.delete('search');
+        window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
+    });
 
     window.slideImage = function(btn, step){
         const sliderWrap = btn.parentElement;
@@ -412,16 +456,15 @@
         let activeIdx = 0;
         allImgs.forEach((img, idx)=>{
             if(img.classList.contains("active")) activeIdx = idx;
-        })
+        });
         allImgs[activeIdx].classList.remove("active");
         activeIdx = activeIdx + step;
         if(activeIdx >= allImgs.length) activeIdx = 0;
         if(activeIdx < 0) activeIdx = allImgs.length - 1;
         allImgs[activeIdx].classList.add("active");
-    }
+    };
 
-    window.addEventListener("DOMContentLoaded", loadProducts);
+    window.addEventListener("DOMContentLoaded", initProducts);
 </script>
-
 </body>
 </html>

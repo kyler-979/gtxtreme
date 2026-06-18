@@ -20,7 +20,6 @@
         html {
             scroll-behavior: smooth;
         }
-
         /* 头部布局 */
         .header-top {
             display: flex;
@@ -43,7 +42,6 @@
             color: #002060;
             font-size: 22px;
         }
-
         .search-box {
             display: flex;
         }
@@ -62,7 +60,6 @@
             cursor: pointer;
             font-size: 15px;
         }
-
         .header-right {
             display: flex;
             align-items: center;
@@ -77,7 +74,6 @@
             height: 44px;
             display: block;
         }
-
         /* 居中导航 */
         .main-nav {
             background-color: #28a745;
@@ -103,7 +99,6 @@
         .nav-list li a.active {
             background-color: #218838;
         }
-
         /* 左右横幅整体容器 */
         .banner-row {
             display: flex;
@@ -154,7 +149,6 @@
         .dot-left.active {
             background: #28a745;
         }
-
         /* 右侧：产品横幅 占50%宽度 */
         .banner-right {
             width: 50%;
@@ -197,7 +191,6 @@
         .dot-right.active {
             background: #fff;
         }
-
         .product-section {
             padding: 50px 4%;
         }
@@ -222,7 +215,6 @@
         .product-card:hover {
             box-shadow: 0 3px 12px #ddd;
         }
-
         /* 产品卡片图片切换 */
         .img-slider {
             position: relative;
@@ -255,7 +247,6 @@
         }
         .prev-btn { left: 5px; }
         .next-btn { right: 5px; }
-
         .sku-name {
             font-size: 17px;
             color: #111;
@@ -269,7 +260,6 @@
             text-align: center;
             line-height: 1.4;
         }
-
         /* 底部黑灰联系区域 */
         #contact-section {
             background-color: #333333;
@@ -314,7 +304,6 @@
             border-radius: 4px;
             font-weight: bold;
         }
-
         /* 移动端自动变为上下排列 */
         @media (max-width: 768px) {
             .banner-row {
@@ -327,7 +316,6 @@
     </style>
 </head>
 <body>
-
 <div class="header-top">
     <div class="logo-box">
         <img src="logo.png" alt="Company Logo">
@@ -335,12 +323,11 @@
             <h2>CX BEARING SDN.BHD.</h2>
         </div>
     </div>
-
-    <div class="search-box">
-        <input type="text" placeholder="Search LUBRICANT/ BEARING / GREASE">
-        <button>Search</button>
-    </div>
-
+    <!-- 增加id、submit搜索跳转 -->
+    <form class="search-box" id="homeSearchBox">
+        <input type="text" id="homeSearchInput" placeholder="Search LUBRICANT/ BEARING / GREASE">
+        <button type="submit">Search</button>
+    </form>
     <div class="header-right">
         <div class="top-phone">Tel: 603-6179 6833</div>
         <a href="https://wa.me/60124770833" target="_blank">
@@ -348,7 +335,6 @@
         </a>
     </div>
 </div>
-
 <nav class="main-nav">
     <div class="nav-container">
         <ul class="nav-list">
@@ -358,7 +344,6 @@
         </ul>
     </div>
 </nav>
-
 <!-- 左右分栏横幅容器 -->
 <div class="banner-row">
     <!-- 左侧：2张factory厂房图 -->
@@ -372,7 +357,6 @@
             <span class="dot-left" data-index="1"></span>
         </div>
     </div>
-
     <!-- 右侧：6张banner产品图 -->
     <div class="banner-right">
         <div class="right-track">
@@ -393,19 +377,16 @@
         </div>
     </div>
 </div>
-
 <section class="product-section">
     <h2 class="section-title">Our Products</h2>
     <div class="product-grid" id="productContainer">
         <div style="grid-column: 1/-1; text-align:center; padding:30px;">Loading products...</div>
     </div>
 </section>
-
 <section id="contact-section">
     <div class="map-circle">
            <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3983.621315403497!2d101.67004610000001!3d3.1938036999999992!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31cc4708be506d9f%3A0x235aa3af4de793d2!2sCX%20Bearing%20Sdn.%20Bhd.%20(KL)!5e0!3m2!1szh-CN!2smy!4v1781670911989!5m2!1szh-CN!2smy" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     </div>
-
     <h2 class="contact-title">CX BEARING SDN.BHD.</h2>
     <div class="contact-detail">
         <p>No.1, Jalan 2/46A Off Jalan Selingsing 7,</p>
@@ -413,10 +394,8 @@
         <p><strong>Tel:</strong> 603-6179 6833</p>
         <p><strong>Phone:</strong> 6012-477 0833</p>
     </div>
-
     <a href="#" class="back-top">BACK TO TOP</a>
 </section>
-
 <script>
     // 左侧厂房轮播逻辑
     const leftTrack = document.querySelector('.left-track');
@@ -437,7 +416,6 @@
         updateLeft();
     }));
     setInterval(nextLeft, 4500);
-
     // 右侧产品轮播逻辑
     const rightTrack = document.querySelector('.right-track');
     const rightSlides = document.querySelectorAll('.right-slide');
@@ -457,11 +435,22 @@
         updateRight();
     }));
     setInterval(nextRight, 4000);
-</script>
 
-<script>
+    // ========== 首页搜索跳转功能新增 ==========
+    const homeSearchBox = document.getElementById('homeSearchBox');
+    const homeSearchInput = document.getElementById('homeSearchInput');
+    homeSearchBox.addEventListener('submit', function(e){
+        e.preventDefault();
+        const keyword = homeSearchInput.value.trim();
+        if(keyword){
+            window.location.href = `our-products.html?search=${encodeURIComponent(keyword)}`;
+        }else{
+            window.location.href = 'our-products.html';
+        }
+    });
+
+    // 原有产品加载
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCMx-Kyp9zaYFWNOqkRXP9FogYGYI77eU1ZZt--guZRFNRjsHuJBeB7ZkOaolrAYnfbZThlJ82zJtB/pub?gid=1677472404&single=true&output=csv";
-
     async function loadProducts() {
         const container = document.getElementById('productContainer');
         try {
@@ -469,25 +458,21 @@
             const csvText = await res.text();
             const rows = csvText.trim().split("\n");
             let html = "";
-
             for(let i = 1; i < rows.length; i++){
                 const cols = rows[i].split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
                 const sku = cols[0]?.trim() || "";
                 const desc = cols[1]?.trim() || "";
                 const imgRaw = cols[2]?.trim() || "";
                 let imgArr = imgRaw.split(",").slice(0,3);
-
                 let imgHtml = "";
                 imgArr.forEach((imgUrl, idx)=>{
                     let actClass = idx === 0 ? "active" : "";
                     imgHtml += `<img class="slider-img ${actClass}" src="${imgUrl.trim()}" alt="${sku}">`;
                 })
-
                 let btnHtml = imgArr.length > 1 ? `
                     <button class="slide-btn prev-btn" onclick="slideImage(this, -1)">&lt;</button>
                     <button class="slide-btn next-btn" onclick="slideImage(this, 1)">&gt;</button>
                 ` : "";
-
                 html += `
                 <div class="product-card">
                     <div class="img-slider">
@@ -505,7 +490,6 @@
             console.error(err);
         }
     }
-
     window.slideImage = function(btn, step){
         const sliderWrap = btn.parentElement;
         const allImgs = sliderWrap.querySelectorAll(".slider-img");
@@ -519,9 +503,7 @@
         if(activeIdx < 0) activeIdx = allImgs.length - 1;
         allImgs[activeIdx].classList.add("active");
     }
-
     window.addEventListener("DOMContentLoaded", loadProducts);
 </script>
-
 </body>
 </html>
