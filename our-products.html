@@ -150,7 +150,7 @@
             height: 140px;
             object-fit: contain;
             border: 1px solid #e9ecef;
-            border-radius: 12px;
+            border-radius 12px;
             background: #fff;
             padding: 10px;
         }
@@ -177,6 +177,7 @@
             transform: translateY(-6px);
             box-shadow: 0 8px 24px rgba(0,0,0,0.09);
         }
+        /* 修复轮播CSS 绝对定位透明度方案 */
         .img-slider {
             position: relative;
             height: 170px;
@@ -186,13 +187,18 @@
             background-color: #f8f9fa;
         }
         .slider-img {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             object-fit: contain;
-            display: none;
+            opacity: 0;
+            visibility: hidden;
         }
         .slider-img.active {
-            display: block;
+            opacity: 1;
+            visibility: visible;
         }
         .slide-btn {
             position: absolute;
@@ -206,7 +212,7 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 16px;
-            z-index: 2;
+            z-index: 10;
             transition: background 0.2s ease;
         }
         .slide-btn:hover {
@@ -453,19 +459,22 @@
         window.history.replaceState({}, '', `${window.location.pathname}?${urlParams.toString()}`);
     });
 
-    // 修复图片切换核心逻辑
+    // 统一稳定切换函数
     window.slideImage = function(btn, step) {
         const sliderWrap = btn.parentElement;
         const allImgs = sliderWrap.querySelectorAll(".slider-img");
-        let currentIndex = -1;
-        allImgs.forEach((img, index) => {
-            if (img.classList.contains("active")) currentIndex = index;
-        });
+        let currentIndex = 0;
+        for(let i=0; i<allImgs.length; i++){
+            if(allImgs[i].classList.contains("active")){
+                currentIndex = i;
+                break;
+            }
+        }
         allImgs.forEach(img => img.classList.remove("active"));
-        let newIndex = currentIndex + step;
-        if (newIndex >= allImgs.length) newIndex = 0;
-        if (newIndex < 0) newIndex = allImgs.length - 1;
-        allImgs[newIndex].classList.add("active");
+        let newIdx = currentIndex + step;
+        if(newIdx >= allImgs.length) newIdx = 0;
+        if(newIdx < 0) newIdx = allImgs.length - 1;
+        allImgs[newIdx].classList.add("active");
     };
 
     window.addEventListener("DOMContentLoaded", initProducts);

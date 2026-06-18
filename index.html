@@ -215,21 +215,27 @@
         .product-card:hover {
             box-shadow: 0 3px 12px #ddd;
         }
-        /* 产品卡片图片切换 */
+        /* 【修复核心CSS】绝对定位+透明度控制，不会重叠消失 */
         .img-slider {
             position: relative;
             height: 160px;
             margin-bottom: 12px;
             overflow: hidden;
+            background-color: #fff;
         }
         .slider-img {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             object-fit: contain;
-            display: none;
+            opacity: 0;
+            visibility: hidden;
         }
         .slider-img.active {
-            display: block;
+            opacity: 1;
+            visibility: visible;
         }
         .slide-btn {
             position: absolute;
@@ -243,7 +249,7 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 16px;
-            z-index: 2;
+            z-index: 10;
         }
         .prev-btn { left: 5px; }
         .next-btn { right: 5px; }
@@ -448,7 +454,7 @@
         }
     });
 
-    // 产品加载逻辑（修复图片空值、切换bug）
+    // 产品加载逻辑
     const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSCMx-Kyp9zaYFWNOqkRXP9FogYGYI77eU1ZZt--guZRFNRjsHuJBeB7ZkOaolrAYnfbZThlJ82zJtB/pub?gid=1677472404&single=true&output=csv";
     async function loadProducts() {
         const container = document.getElementById('productContainer');
@@ -462,7 +468,7 @@
                 const sku = cols[0]?.trim() || "";
                 const desc = cols[1]?.trim() || "";
                 const imgRaw = cols[2]?.trim() || "";
-                // 过滤空图片链接
+                // 过滤空图片
                 let imgArr = imgRaw.split(",").map(u=>u.trim()).filter(u=>u).slice(0,3);
                 let imgHtml = "";
                 imgArr.forEach((imgUrl, idx)=>{
@@ -494,19 +500,27 @@
         }
     }
 
-    // 最终修复图片切换函数：清空全部active再赋值
-    window.slideImage = function(btn, step) {
+    // 稳定切换函数
+    window.slideImage = function(btn) {
+        const step = event.target.classList.contains('prev-btn') ? -1 : 1;
         const sliderWrap = btn.parentElement;
         const allImgs = sliderWrap.querySelectorAll(".slider-img");
-        let currentIndex = -1;
-        allImgs.forEach((img, index) => {
-            if (img.classList.contains("active")) currentIndex = index;
-        });
+        let currentIndex = 0;
+        // 找到当前激活图
+        for(let i=0; i<allImgs.length; i++){
+            if(allImgs[i].classList.contains("active")){
+                currentIndex = i;
+                break;
+            }
+        }
+        // 全部取消激活
         allImgs.forEach(img => img.classList.remove("active"));
-        let newIndex = currentIndex + step;
-        if (newIndex >= allImgs.length) newIndex = 0;
-        if (newIndex < 0) newIndex = allImgs.length - 1;
-        allImgs[newIndex].classList.add("active");
+        // 计算新下标
+        let newIdx = currentIndex + step;
+        if(newIdx >= allImgs.length) newIdx = 0;
+        if(newIdx < 0) newIdx = allImgs.length - 1;
+        // 仅激活一张
+        allImgs[newIdx].classList.add("active");
     };
 
     window.addEventListener("DOMContentLoaded", loadProducts);
